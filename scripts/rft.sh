@@ -1,0 +1,50 @@
+set -x
+
+ray job submit --address="http://127.0.0.1:8265" \
+   --runtime-env-json='{"working_dir": "src/"}' \
+   -- python train_ppo_ray.py \
+   --colocate_all_models \
+   --ref_num_nodes 16 \
+   --ref_num_gpus_per_node 8 \
+   --actor_num_nodes 16 \
+   --actor_num_gpus_per_node 8 \
+   --vllm_num_engines 128 \
+   --vllm_tensor_parallel_size 1 \
+   --vllm_gpu_memory_utilization 0.4 \
+   --vllm_enable_sleep \
+   --pretrain /root/ebfs/models/sft \
+   --save_path /root/ebfs/models/rl \
+   --micro_train_batch_size 1 \
+   --train_batch_size 256 \
+   --micro_rollout_batch_size 1 \
+   --rollout_batch_size 512 \
+   --n_samples_per_prompt 16 \
+   --temperature 1.0 \
+   --max_epochs 1 \
+   --num_episodes 1 \
+   --prompt_max_len 5120 \
+   --max_samples 100000 \
+   --generate_max_len 10240 \
+   --gamma 1.0 \
+   --advantage_estimator group_norm \
+   --kl_estimator k3 \
+   --eps_clip_low_high 0.1 0.12 \
+   --zero_stage 3 \
+   --lr_scheduler constant_with_warmup \
+   --lr_warmup_steps 30 \
+   --flash_attn \
+   --bf16 \
+   --ref_reward_offload \
+   --actor_learning_rate 5e-6 \
+   --prompt_data /root/ebfs/data/rft.json \
+   --input_key prompt \
+   --eval_dataset /root/ebfs/data/valid.json \
+   --eval_n_samples_per_prompt 1 \
+   --eval_steps 1 \
+   --eval_temperature 0.8 \
+   --normalize_reward \
+   --gradient_checkpointing \
+   --save_steps 1 \
+   --ckpt_path /root/ckpt/rl \
+   --save_hf_ckpt \
+   --use_tensorboard /root/log
