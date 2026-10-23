@@ -1,0 +1,4 @@
+torch==2.8.0
+transformers==4.57.0
+vllm==0.11.0
+openrlhf==0.9.0
